@@ -20,8 +20,7 @@ enable_testing()
 
 add_executable(${PROJECT_NAME} main.cpp arithmeticAverage.cpp)
 add_executable(${PROJECT_NAME}-ut test.cpp arithmeticAverage.cpp)
-target_link_libraries(${PROJECT_NAME} tbb)
-target_link_libraries(${PROJECT_NAME}-ut gtest_main tbb)
+target_link_libraries(${PROJECT_NAME}-ut gtest_main)
 
 include(GoogleTest)
 gtest_discover_tests(${PROJECT_NAME}-ut)
