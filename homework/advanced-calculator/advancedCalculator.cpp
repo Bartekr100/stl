@@ -4,7 +4,6 @@
 #include <functional>
 #include <map>
 
-
 auto plus = [](const double first, const double second) { return first + second; };
 auto minus = [](const double first, const double second) { return first - second; };
 auto divide = [](const double first, const double second) { return first / second; };
@@ -87,8 +86,28 @@ ErrorCode process(std::string input, double* out) {
     sign = input[currentPosStart];
     input = input.substr(currentPosStart + 1);
 
-    secondNumber = getNumber(input, status);
+    if (sign == '!' && input.find_first_not_of(' ') != std::string::npos) {
+        return ErrorCode::BadFormat;
+    }
+
+    if (sign != '!') {
+        secondNumber = getNumber(input, status);
+    }
     if (status != ErrorCode::OK) {
         return status;
     }
+
+    if ((sign == '/'|| sign == '%') && secondNumber == 0.0) {
+        return ErrorCode::DivideBy0;
+    }
+
+    if (sign == '$' && firstNumber < 0.0) {
+        return ErrorCode::SqrtOfNegativeNumber;
+    }
+
+    if (sign == '%' && (static_cast<int>(firstNumber) != firstNumber) || (static_cast<int>(secondNumber) != secondNumber)) {
+        return ErrorCode::ModuleOfNonIntegerValue;
+    }
+
+    return ErrorCode::OK;
 }
