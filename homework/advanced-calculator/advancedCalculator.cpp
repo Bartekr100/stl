@@ -1,6 +1,21 @@
 #include "advancedCalculator.hpp"
 #include <algorithm>
-#include <iostream>
+#include <cmath>
+#include <functional>
+#include <map>
+
+
+auto plus = [](const double first, const double second) { return first + second; };
+auto minus = [](const double first, const double second) { return first - second; };
+auto divide = [](const double first, const double second) { return first / second; };
+auto multiply = [](const double first, const double second) { return first * second; };
+auto modulo = [](const double first, const double second) { return static_cast<int>(first) % static_cast<int>(second); };
+auto factorial = [](const double first, const double second) { return std::tgamma(first + 1); };
+auto power = [](const double first, const double second) { return std::pow(first, second); };
+auto root = [](const double first, const double second) { return std::pow(first, 1.0 / second); };
+
+std::unordered_map<char, std::function<double(double, double)>> operations =
+    {{'+', plus}, {'-', minus}, {'/', divide}, {'*', multiply}, {'%', modulo}, {'^', power}, {'!', factorial}, {'$', root}};
 
 double getNumber(std::string& input, ErrorCode& status) {
     size_t currentPosStart = 0;
