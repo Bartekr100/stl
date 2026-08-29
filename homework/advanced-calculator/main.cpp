@@ -1,17 +1,37 @@
-#include "advancedCalculator.hpp"
 #include <iostream>
+#include "advancedCalculator.hpp"
+
 int main() {
-    std::string input1 = "500 +- 280";
-    std::string input2 = "1.999-+0.001";
-    std::string input3 = "2.7+3.8";
-    std::string input4 = ".50 + 20";
-    double a = 2.47;
-    double* b;
+    std::string formula = "";
+    double result = 0.0;
+    ErrorCode status = ErrorCode::OK;
+    while (true) {
+        std::cout << "Enter formula to calculate: ";
+        std::getline(std::cin, formula);
 
+        if (formula == "q" || formula == "exit") {
+            break;
+        }
 
-    std::cout<<input1<<"next:"; process(input1, b); std::cout<<"\n";
-    std::cout<<input2<<"next:"; process(input2, b); std::cout<<"\n";
-     std::cout<<input3<<"next:"; process(input3, b); std::cout<<"\n";
-     std::cout<<input4<<"next:"; process(input4, b); std::cout<<"\n";
-
+        switch (status) {
+        case ErrorCode::OK:
+            std::cout << "Result of " << formula << " equals: " << result << "\n";
+            break;
+        case ErrorCode::BadCharacter:
+            std::cout << "ERROR: Entered wrong character." << "\n";
+            break;
+        case ErrorCode::BadFormat:
+            std::cout << "ERROR: Wrong format of formula." << "\n";
+            break;
+        case ErrorCode::DivideBy0:
+            std::cout << "ERROR: Can't divide by 0." << "\n";
+            break;
+        case ErrorCode::SqrtOfNegativeNumber:
+            std::cout << "ERROR: Can't calculate sqrt root of negative number." << "\n";
+            break;
+        case ErrorCode::ModuleOfNonIntegerValue:
+            std::cout << "ERROR: Can't calculate modulo with non integer values." << "\n";
+            break;
+        }
+    }
 }
