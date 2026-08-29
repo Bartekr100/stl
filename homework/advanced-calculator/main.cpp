@@ -12,7 +12,7 @@ int main() {
         if (formula == "q" || formula == "exit") {
             break;
         }
-
+        status = process(formula, &result);
         switch (status) {
         case ErrorCode::OK:
             std::cout << "Result of " << formula << " equals: " << result << "\n";
