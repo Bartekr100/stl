@@ -9,7 +9,7 @@ auto minus = [](const double first, const double second) { return first - second
 auto divide = [](const double first, const double second) { return first / second; };
 auto multiply = [](const double first, const double second) { return first * second; };
 auto modulo = [](const double first, const double second) { return static_cast<int>(first) % static_cast<int>(second); };
-auto factorial = [](const double first, const double second) { return std::tgamma(first + 1); };
+auto factorial = [](const double first, const double second) {if(first<0.0){return -std::tgamma(-first+1);}return std::tgamma(first + 1); };
 auto power = [](const double first, const double second) { return std::pow(first, second); };
 auto root = [](const double first, const double second) { return std::pow(first, 1.0 / second); };
 
@@ -37,14 +37,11 @@ double getNumber(std::string& input, ErrorCode& status) {
     if (input[currentPosStart] == '-') {
         number += input[currentPosStart];
         ++currentPosStart;
-    } else if (input[currentPosStart] == '+') {
-        number += input[currentPosStart];
-        ++currentPosStart;
     }
 
     currentPosStop = input.find_first_not_of("0123456789.", currentPosStart);
     if (currentPosStop == std::string::npos) {
-        return std::stod(input);
+        currentPosStop = input.length();
     }
 
     if (currentPosStop == currentPosStart) {
@@ -57,9 +54,8 @@ double getNumber(std::string& input, ErrorCode& status) {
         return 0.0;
     }
 
-    if (input.length() > currentPosStop || currentPosStop != std::string::npos) {
-        input = input.substr(currentPosStop);
-    }
+    input = input.substr(currentPosStop);
+
     return std::stod(number);
 }
 
@@ -68,15 +64,25 @@ ErrorCode process(std::string input, double* out) {
     double firstNumber = 0.0;
     double secondNumber = 0.0;
     char sign = ' ';
+    std::string all = "+-/*%!^$1234567890., ";
+    if (input.find_first_not_of(all) != std::string::npos) {
+        return ErrorCode::BadCharacter;
+    }
+
+    if (input.find(',') != std::string::npos) {
+        return ErrorCode::BadFormat;
+    }
     firstNumber = getNumber(input, status);
     if (status != ErrorCode::OK) {
         return status;
     }
     size_t currentPosStart = 0;
     size_t currentPosStop = 0;
-
     std::string signs = "+-/*%!^$";
     currentPosStart = input.find_first_of(signs);
+    if (currentPosStart == std::string::npos) {
+        return ErrorCode::BadFormat;
+    }
     if (currentPosStart != currentPosStop) {
         std::string pre = input.substr(currentPosStop, currentPosStart);
         if (std::any_of(begin(pre), end(pre), [](const char el) { return el != ' '; })) {
@@ -92,12 +98,15 @@ ErrorCode process(std::string input, double* out) {
 
     if (sign != '!') {
         secondNumber = getNumber(input, status);
+        if (status != ErrorCode::OK) {
+            return status;
+        }
     }
-    if (status != ErrorCode::OK) {
-        return status;
+    if (input.find_first_not_of(' ') != std::string::npos) {
+        return ErrorCode::BadFormat;
     }
 
-    if ((sign == '/'|| sign == '%') && secondNumber == 0.0) {
+    if (sign == '/' && secondNumber == 0.0) {
         return ErrorCode::DivideBy0;
     }
 
@@ -105,9 +114,13 @@ ErrorCode process(std::string input, double* out) {
         return ErrorCode::SqrtOfNegativeNumber;
     }
 
-    if (sign == '%' && (static_cast<int>(firstNumber) != firstNumber) || (static_cast<int>(secondNumber) != secondNumber)) {
+    if (sign == '%' && ((secondNumber == 0) || (static_cast<int>(firstNumber) != firstNumber) || (static_cast<int>(secondNumber) != secondNumber))) {
         return ErrorCode::ModuleOfNonIntegerValue;
     }
+
+    auto it = operations.find(sign);
+
+    *out = it->second(firstNumber, secondNumber);
 
     return ErrorCode::OK;
 }
